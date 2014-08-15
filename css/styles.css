@@ -23,5 +23,11 @@ html, body {
 	border-radius: 50%;
 }
 .ball {
-
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 16px;
+	height: 16px;
+	background: pink;
+	border-radius: 50%;
 }

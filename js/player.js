@@ -9,9 +9,11 @@ function Player(id, options) {
 		css: {
 			background: "red"
 		},
+		radius: 32,
+
 		pos: {x:0, y:0},
-		vel: {x:0.1, y:0},
-		acc: {x:0.0001, y:0},
+		vel: {x:0, y:0},
+		acc: {x:0, y:0},
 
 		xvel: 0.1,
 		yvel: 0.1,
@@ -23,7 +25,6 @@ function Player(id, options) {
 	// create the player by default
 	this.create();
 }
-
 /**
  * Creates the player object.
  *
@@ -32,11 +33,14 @@ function Player(id, options) {
 Player.prototype.create = function() {
 	var player = $("<div>")
 		.attr("id",this.id)
-		.addClass("player")
+		.addClass("player entity")
 		.css(this.settings.css);
 
 	// add this to the game
 	player.appendTo(Game.context);
+
+	// initial player dimensions
+	this.settings.radius = player.width() / 2;
 };
 /**
  * Updates the player object.
@@ -83,8 +87,8 @@ Player.prototype.update = function() {
  */
 Player.prototype.render = function() {
 	this.get().css({
-		left: this.settings.pos.x,
-		top: this.settings.pos.y
+		left: this.settings.pos.x - this.settings.radius,
+		top: this.settings.pos.y - this.settings.radius
 	});
 };
 /**
@@ -95,7 +99,6 @@ Player.prototype.render = function() {
 Player.prototype.get = function() {
 	return $("#"+this.id);
 };
-
 /**
  * General player movement.
  *

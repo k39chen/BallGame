@@ -4,7 +4,13 @@
  * @param options {Object} The ball settings.
  */
 function Ball(id, options) {
+	this.id = id;
 	this.settings = $.extend({
+		css: {
+			background: "pink"
+		},
+		radius: 16,
+
 		pos: {x:0, y:0},
 		vel: {x:0, y:0},
 		acc: {x:0, y:0}
@@ -21,14 +27,15 @@ function Ball(id, options) {
  */
 Ball.prototype.create = function() {
 	var ball = $("<div>")
-		.attr("id",this.settings.id)
-		.addClass("ball");
-
-	// bind some events onto the ball entity
-	// ...
+		.attr("id",this.id)
+		.addClass("ball entity")
+		.css(this.settings.css);
 
 	// add this to the game
 	ball.appendTo(Game.context);
+
+	// initial ball dimensions
+	this.settings.radius = ball.width() / 2;
 };
 /**
  * Updates the ball object.
@@ -44,7 +51,10 @@ Ball.prototype.update = function() {
  * @method render
  */
 Ball.prototype.render = function() {
-
+	this.get().css({
+		left: this.settings.pos.x - this.settings.radius,
+		top: this.settings.pos.y - this.settings.radius
+	});
 };
 /**
  * Retrieves the instance of this ball.
@@ -52,5 +62,5 @@ Ball.prototype.render = function() {
  * @method get
  */
 Ball.prototype.get = function() {
-	return $("#"+settings.id);
+	return $("#"+this.id);
 };

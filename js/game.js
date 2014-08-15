@@ -28,18 +28,23 @@ var Game = {
 		};
 
 		// create the player entities
-		self.ent.player1 = new Player("player1", {
-			css: {
-				background: "red"
-			},
-			pos: {x: 0, y: 0}
-		});
-		self.ent.player2 = new Player("player2", {
-			css: {
-				background: "green"
-			},
-			pos: {x: 0, y: 64}
-		});
+		self.ent.player1 = new Player("player1", {css: {background: "red"}});
+		self.ent.player2 = new Player("player2", {css: {background: "green"}});
+
+		// create the balls
+		for (var i=0; i<24; i++) {
+			var ball = new Ball("ball"+i,{});
+			self.ent.balls.push(ball);
+		}
+
+		// randomly position everything
+		self.ent.player1.settings.pos = self.getRandomFreePosition(self.ent.player1);
+		self.ent.player2.settings.pos = self.getRandomFreePosition(self.ent.player2);
+		for (var i=0; i<self.ent.balls.length; i++) {
+			self.ent.balls[i].settings.pos = self.getRandomFreePosition(self.ent.balls[i]);
+		}
+
+		console.log(self.ent.player1);
 
 		// set up the controls
 		self.setupControls();
@@ -157,6 +162,63 @@ var Game = {
 				$.proxy(self.ent[type].render(),self);
 			}
 		}
+	},
+	/**
+	 * Gets a position where there is no collision that will occur
+	 *
+	 * @method getRandomFreePosition
+	 * @param obj {Object} The entity that we want to position.
+	 * @return {Object} The position vector.
+	 */
+	getRandomFreePosition: function(obj) {
+		var self = this,
+			x = getRandom(0,self.canvas.width),
+			y = getRandom(0,self.canvas.height);
+		
+		if (self.collides(obj)) {
+			return self.getRandomFreePosition(obj);
+		}
+		return {x:x,y:y};
+	},
+	/**
+	 * Determines if a collision has occured.
+	 *
+	 * @method collides
+	 * @param obj {Object} The object that we are testing.
+	 * @return {Object} The collision test results.
+	 */
+	collides: function(obj) {
+		var hasCollision = false;
+		var sr = obj.settings.radius / 2,
+			sx = obj.settings.pos.x,
+			sy = obj.settings.pos.y;
+
+
+		return false;
+
+		console.log(obj);
+
+		$(".entity").each(function(index,elem){
+			var $elem = $(elem);
+
+			if (hasCollision || $elem.attr("id") === obj.id) return;
+
+			var dr = $elem.width() / 2,
+				dx = parseInt($elem.css("left"), 10),
+				dy = parseInt($elem.css("top"), 10);
+
+			// calculate the distance between the two points
+			var distance = Math.sqrt( Math.pow(dx-sx,2) + Math.pow(dy-sy,2) );
+
+			// a collision has occurred!
+			if (distance <= sr + dr) {
+				hasCollision = true;
+			}
+		});
+
+		console.log( hasCollision );
+
+		return hasCollision;
 	}
 };
 
@@ -164,3 +226,7 @@ $(document).ready(function(){
 	// initialize the game
 	Game.init();
 });
+
+window.getRandom = function(min,max) {
+	return Math.floor(Math.random() * (max-min)) + min;
+};
