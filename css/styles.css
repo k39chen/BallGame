@@ -1,0 +1,27 @@
+* {
+	font-family: Arial;
+}
+html, body {
+	background-color: #37393D;
+	color: #EBEBEB;
+	font-size: 14px;
+}
+#game {
+	width: 500px;
+	height: 300px;
+
+	border: solid 1px #aaa;
+	position: relative;
+}
+.player {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 32px;
+	height: 32px;
+	background: red;
+	border-radius: 50%;
+}
+.ball {
+
+}
