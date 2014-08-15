@@ -1,3 +1,5 @@
+var keys = {};
+
 var Game = {
 	fps: 60,
 	interval: null,
@@ -26,21 +28,75 @@ var Game = {
 		};
 
 		// create the player entities
-		self.ent.player1 = self.createPlayerEntity("player1");
-		self.ent.player2 = self.createPlayerEntity("player2");
+		self.ent.player1 = new Player("player1", {
+			css: {
+				background: "red"
+			},
+			pos: {x: 0, y: 0}
+		});
+		self.ent.player2 = new Player("player2", {
+			css: {
+				background: "green"
+			},
+			pos: {x: 0, y: 64}
+		});
 
-
-
-		// add the game objects onto the game board
-		self.context.append(
-			self.ent.player1,
-			self.ent.player2
-		);
-	
-		console.log(self.context);
+		// set up the controls
+		self.setupControls();
 
 		// start the game loop
-		//self.interval = setInterval(self.loop, 1000/self.fps);
+		self.interval = setInterval($.proxy(self.loop,self), 1);
+	},
+	/**
+	 * Set up the controls for the game
+	 *
+	 * @method setupControls
+	 */
+	setupControls: function() {
+		var self = this;
+		$(document).keydown(function (e) {
+			keys[e.which] = true;
+   
+			// go through all of the pressed keys
+			for (var keyCode in keys) {
+				if (!keys.hasOwnProperty(keyCode)) continue;
+				switch (parseInt(keyCode,10)) {
+					// PLAYER 1 CONTROLS
+					case 37: // move left
+						self.ent.player1.moveLeft();
+						break;
+					case 38: // move up
+						self.ent.player1.moveUp();
+						break;
+					case 39: // move right
+						self.ent.player1.moveRight();
+						break;
+					case 40: // move down
+						self.ent.player1.moveDown();
+						break;
+
+					// PLAYER 2 CONTROLS
+					case 65: // move left
+						self.ent.player2.moveLeft();
+						break;
+					case 87: // move up
+						self.ent.player2.moveUp();
+						break;
+					case 68: // move right
+						self.ent.player2.moveRight();
+						break;
+					case 83: // move down
+						self.ent.player2.moveDown();
+						break;
+
+					default:
+						break;
+				}
+			}
+		});
+		$(document).keyup(function (e) {
+			delete keys[e.which];
+		});
 	},
 	/**
 	 * Remove all elements in the game and unbind all events.
@@ -51,65 +107,15 @@ var Game = {
 		var self = this;
 
 		if (self.ent.player1) {
-			self.ent.player1.unbind("keyup");
-			self.ent.player1.unbind("keydown");
-			self.ent.player1.remove();
+			self.ent.player1.destroy();
 		}
 		if (self.ent.player2) {
-			self.ent.player2.unbind("keyup");
-			self.ent.player2.unbind("keydown");
-			self.ent.player2.remove();
+			self.ent.player2.destroy();
 		}
 		for (var i=0; i<self.ent.balls.length; i++) {
-			self.ent.balls[i].remove();
+			self.ent.balls[i].destroy();
 		}
 		self.context.empty();
-	},
-	/**
-	 * Creates a player entity.
-	 *
-	 * @method createPlayerEntity
-	 * @param id {String} The player id.
-	 * @param options {Object} The player settings. 
-	 * @return {Object} The player DOM entity.
-	 */
-	createPlayerEntity: function(id,options) {
-		var player = $("<div>")
-			.attr("id",id)
-			.addClass("player");
-
-		// apply each of the options to the player
-		for (var o in options) {
-			player.data(o,options[o]);
-		}
-
-		// bind some events onto the player entity
-		// ...
-	
-		return player;
-	},
-	/**
-	 * Creates a ball entity
-	 *
-	 * @method createBallEntity
-	 * @param id {String} The ball id.
-	 * @param options {Object} The ball settings.
-	 * @return {Object} The ball DOM entity.
-	 */
-	createBallEntity: function(id,options) {
-		var ball = $("<div>")
-			.attr("id",id)
-			.addClass("ball");
-
-		// apply each of the options to the ball
-		for (var o in options) {
-			ball.data(o,options[o]);
-		}
-
-		// bind some events onto the ball entity
-		// ...
-
-		return player;
 	},
 	/**
 	 * An iteration of the game loop.
@@ -117,10 +123,41 @@ var Game = {
 	 * @method loop
 	 */
 	loop: function() {
+		var self = this;
 
+		// perform game logic
+		for (var type in self.ent) {
+			if ($.isArray(self.ent[type])) {
+				var list = self.ent[type];
+				for (var i=0; i<list.length; i++) {
+					list[i].update();
+				}
+			} else {
+				$.proxy(self.ent[type].update(),self);
+			}
+		}
 
+		self.render();
+	},
+	/**
+	 * Renders the game objects based on their metadata
+	 *
+	 * @method render
+	 */
+	render: function() {
+		var self = this;
+
+		for (var type in self.ent) {
+			if ($.isArray(self.ent[type])) {
+				var list = self.ent[type];
+				for (var i=0; i<list.length; i++) {
+					$.proxy(list[i].render(),self);
+				}
+			} else {
+				$.proxy(self.ent[type].render(),self);
+			}
+		}
 	}
-
 };
 
 $(document).ready(function(){
